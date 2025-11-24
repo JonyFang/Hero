@@ -54,6 +54,10 @@ extension HeroModifier {
    - position: position for the view to animate from/to
    */
   public static func position(_ position: CGPoint) -> HeroModifier {
+    guard position.x.isFinite, position.y.isFinite else {
+      assertionFailure("Hero: Invalid position values (NaN or Infinity). Position: \(position)")
+      return HeroModifier { _ in }
+    }
     return HeroModifier { targetState in
       targetState.position = position
     }
@@ -65,6 +69,10 @@ extension HeroModifier {
    - size: size for the view to animate from/to
    */
   public static func size(_ size: CGSize) -> HeroModifier {
+    guard size.width.isFinite, size.height.isFinite else {
+      assertionFailure("Hero: Invalid size values (NaN or Infinity). Size: \(size)")
+      return HeroModifier { _ in }
+    }
     return HeroModifier { targetState in
       targetState.size = size
     }
@@ -90,6 +98,10 @@ extension HeroModifier {
    - perspective: set the camera distance of the transform
    */
   public static func perspective(_ perspective: CGFloat) -> HeroModifier {
+    guard perspective.isFinite, perspective != 0 else {
+      assertionFailure("Hero: Invalid perspective value (NaN, Infinity, or zero). Perspective: \(perspective)")
+      return HeroModifier { _ in }
+    }
     return HeroModifier { targetState in
       var transform = targetState.transform ?? CATransform3DIdentity
       transform.m34 = 1.0 / -perspective
@@ -105,6 +117,10 @@ extension HeroModifier {
    - z: scale factor on z axis, default 1
    */
   public static func scale(x: CGFloat = 1, y: CGFloat = 1, z: CGFloat = 1) -> HeroModifier {
+    guard x.isFinite, y.isFinite, z.isFinite else {
+      assertionFailure("Hero: Invalid scale values (NaN or Infinity). x: \(x), y: \(y), z: \(z)")
+      return HeroModifier { _ in }
+    }
     return HeroModifier { targetState in
       targetState.transform = CATransform3DScale(targetState.transform ?? CATransform3DIdentity, x, y, z)
     }
@@ -127,6 +143,10 @@ extension HeroModifier {
    - z: translation distance on z axis in display pixel, default 0
    */
   public static func translate(x: CGFloat = 0, y: CGFloat = 0, z: CGFloat = 0) -> HeroModifier {
+    guard x.isFinite, y.isFinite, z.isFinite else {
+      assertionFailure("Hero: Invalid translate values (NaN or Infinity). x: \(x), y: \(y), z: \(z)")
+      return HeroModifier { _ in }
+    }
     return HeroModifier { targetState in
       targetState.transform = CATransform3DTranslate(targetState.transform ?? CATransform3DIdentity, x, y, z)
     }
@@ -144,6 +164,10 @@ extension HeroModifier {
    - z: rotation on z axis in radian, default 0
    */
   public static func rotate(x: CGFloat = 0, y: CGFloat = 0, z: CGFloat = 0) -> HeroModifier {
+    guard x.isFinite, y.isFinite, z.isFinite else {
+      assertionFailure("Hero: Invalid rotate values (NaN or Infinity). x: \(x), y: \(y), z: \(z)")
+      return HeroModifier { _ in }
+    }
     return HeroModifier { targetState in
       targetState.transform = CATransform3DRotate(targetState.transform ?? CATransform3DIdentity, x, 1, 0, 0)
       targetState.transform = CATransform3DRotate(targetState.transform!, y, 0, 1, 0)
@@ -342,10 +366,18 @@ extension HeroModifier {
    Sets the duration of the animation for a given view. If not used, Hero will use determine the duration based on the distance and size changes.
    - Parameters:
    - duration: duration of the animation
-   
+
    Note: a duration of .infinity means matching the duration of the longest animation. same as .durationMatchLongest
    */
   public static func duration(_ duration: TimeInterval) -> HeroModifier {
+    guard duration.isFinite || duration == .infinity else {
+      assertionFailure("Hero: Invalid duration value (NaN). Duration: \(duration)")
+      return HeroModifier { _ in }
+    }
+    guard duration >= 0 else {
+      assertionFailure("Hero: Duration must be non-negative. Duration: \(duration)")
+      return HeroModifier { _ in }
+    }
     return HeroModifier { targetState in
       targetState.duration = duration
     }
@@ -364,6 +396,14 @@ extension HeroModifier {
    - delay: delay of the animation
    */
   public static func delay(_ delay: TimeInterval) -> HeroModifier {
+    guard delay.isFinite else {
+      assertionFailure("Hero: Invalid delay value (NaN or Infinity). Delay: \(delay)")
+      return HeroModifier { _ in }
+    }
+    guard delay >= 0 else {
+      assertionFailure("Hero: Delay must be non-negative. Delay: \(delay)")
+      return HeroModifier { _ in }
+    }
     return HeroModifier { targetState in
       targetState.delay = delay
     }
@@ -439,6 +479,10 @@ extension HeroModifier {
    default is 1.
    */
   public static func arc(intensity: CGFloat = 1) -> HeroModifier {
+    guard intensity.isFinite else {
+      assertionFailure("Hero: Invalid arc intensity value (NaN or Infinity). Intensity: \(intensity)")
+      return HeroModifier { _ in }
+    }
     return HeroModifier { targetState in
       targetState.arc = intensity
     }
